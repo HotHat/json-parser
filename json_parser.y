@@ -7,7 +7,7 @@
 %}
 
 /* Bison declarations. */
-%require "3.2
+%require "3.2"
 %define api.prefix {json_yy}
 /* %define api.pure full */
 %define api.parser.class {JsonParser}
@@ -46,13 +46,13 @@ json:
 value:
     object
 |   array
-|	JSON_T_STRING
-|	JSON_T_ESTRING
-|	JSON_T_INT
-|	JSON_T_DOUBLE
-|	JSON_T_NUL
-|	JSON_T_TRUE
-|	JSON_T_FALSE
+|	JSON_T_STRING { $$ = new JsonValue(*($1), JSON_STRING); }
+|	JSON_T_ESTRING { $$ = new JsonValue(*($1), JSON_STRING); }
+|	JSON_T_INT { $$ = new JsonValue(*($1), JSON_INT); }
+|	JSON_T_DOUBLE { $$ = new JsonValue(*($1), JSON_DOUBLE); }
+|	JSON_T_NUL { $$ = new JsonValue(JSON_NULL); }
+|	JSON_T_TRUE { $$ = new JsonValue(JSON_TRUE); }
+|	JSON_T_FALSE { $$ = new JsonValue(JSON_FALSE); }
 ;
 
 array:
@@ -77,14 +77,14 @@ elements:
     value {
         std::cout << " element value: " << $1->js_str << std::endl;
         $$ = new JsonValue(JSON_ARRAY);
-        $$->js_array.push_back(JsonValue(*($1)));
+        $$->js_array.push_back(*($1));
     }
-|   elements ',' value { std::cout << " more element value: " << $3->js_str << std::endl;  $1->js_array.push_back(JsonValue(*($3))); }
+|   elements ',' value { std::cout << " more element value: " << $3->js_str << std::endl;  $1->js_array.push_back(*($3)); }
 
 
 object:
     '{'
-     members object_end { printf("not empty object\n"); }
+     members object_end { printf("not empty object\n"); $$ = $2; }
 ;
 
 object_end:
@@ -94,13 +94,20 @@ object_end:
 ;
 
 members:
-    member
-|   member ',' members
+    %empty { $$ = new JsonValue(JSON_OBJECT); std::cout << " empty object \n"; }
+|   member {
+        $$ = new JsonValue(*($1), JSON_OBJECT); std::cout << " just one member object \n";
+    }
+|   members ',' member {
+       std::cout << " more element value: " << $3->js_str << "\n";
+       $1->js_object.insert($3->js_object.begin(), $3->js_object.end());
+    }
 ;
 
 member:
     key ':' value {
-        std::cout << "key:" << $1->js_str << " value:" << $3->js_str << std::endl;
+        $$->js_object[$1->js_str] = *($3);
+        std::cout << "object key:" << $1->js_str << " value:" << $3->js_str << std::endl;
     }
 ;
 

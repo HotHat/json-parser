@@ -148,8 +148,9 @@ std:
 		// size_t digits = (size_t) (s->cursor - s->token - negative);
 		char t[100] = {};
 		size_t sz = s->cursor - s->token;
-		strncpy(s->str, (const char *)s->token, sz);
-		s->str[sz] = '\0';
+		// strncpy(s->str, (const char *)s->token, sz);
+		// s->str[sz] = '\0';
+		s->val->js_str.erase();
 		s->val->js_str.append((const char *)s->token, sz);
 		// print_token(t);
 
@@ -160,8 +161,9 @@ std:
 	    // FLOAT|EXP
 		char t[100] = {};
 		size_t sz = s->cursor - s->token;
-		strncpy(s->str, (const char *)s->token, sz);
-		s->str[sz] = '\0';
+		// strncpy(s->str, (const char *)s->token, sz);
+		// s->str[sz] = '\0';
+		s->val->js_str.erase();
 		s->val->js_str.append((const char *)s->token, sz);
 		return JSON_T_DOUBLE;
 	}

@@ -43,8 +43,9 @@ int main() {
     Json::JsonParser parser(&p);
     int t = parser.parse();
     std::cout << "parse file: " << t << std::endl;
-    std::cout << "result array size: " << p.result.js_array.size() << std::endl;
+    // std::cout << "result array size: " << p.result.js_array.size() << std::endl;
 
+    std:: cout << "print the result: \n";
     p.result.print();
     // Json::JsonParser::symbol_type result = parser.
 

@@ -587,31 +587,31 @@ namespace Json {
     break;
 
   case 5: // value: JSON_T_STRING
-        { (yylhs.value.value) = (yystack_[0].value.value); }
+                      { (yylhs.value.value) = new JsonValue(*((yystack_[0].value.value)), JSON_STRING); }
     break;
 
   case 6: // value: JSON_T_ESTRING
-        { (yylhs.value.value) = (yystack_[0].value.value); }
+                       { (yylhs.value.value) = new JsonValue(*((yystack_[0].value.value)), JSON_STRING); }
     break;
 
   case 7: // value: JSON_T_INT
-        { (yylhs.value.value) = (yystack_[0].value.value); }
+                   { (yylhs.value.value) = new JsonValue(*((yystack_[0].value.value)), JSON_INT); }
     break;
 
   case 8: // value: JSON_T_DOUBLE
-        { (yylhs.value.value) = (yystack_[0].value.value); }
+                      { (yylhs.value.value) = new JsonValue(*((yystack_[0].value.value)), JSON_DOUBLE); }
     break;
 
   case 9: // value: JSON_T_NUL
-        { (yylhs.value.value) = (yystack_[0].value.value); }
+                   { (yylhs.value.value) = new JsonValue(JSON_NULL); }
     break;
 
   case 10: // value: JSON_T_TRUE
-        { (yylhs.value.value) = (yystack_[0].value.value); }
+                    { (yylhs.value.value) = new JsonValue(JSON_TRUE); }
     break;
 
   case 11: // value: JSON_T_FALSE
-        { (yylhs.value.value) = (yystack_[0].value.value); }
+                     { (yylhs.value.value) = new JsonValue(JSON_FALSE); }
     break;
 
   case 12: // $@1: %empty
@@ -639,41 +639,54 @@ namespace Json {
           {
         std::cout << " element value: " << (yystack_[0].value.value)->js_str << std::endl;
         (yylhs.value.value) = new JsonValue(JSON_ARRAY);
-        (yylhs.value.value)->js_array.push_back(JsonValue(*((yystack_[0].value.value))));
+        (yylhs.value.value)->js_array.push_back(*((yystack_[0].value.value)));
     }
     break;
 
   case 18: // elements: elements ',' value
-                       { std::cout << " more element value: " << (yystack_[0].value.value)->js_str << std::endl;  (yystack_[2].value.value)->js_array.push_back(JsonValue(*((yystack_[0].value.value)))); }
+                       { std::cout << " more element value: " << (yystack_[0].value.value)->js_str << std::endl;  (yystack_[2].value.value)->js_array.push_back(*((yystack_[0].value.value))); }
     break;
 
   case 19: // object: '{' members object_end
-                        { printf("not empty object\n"); }
+                        { printf("not empty object\n"); (yylhs.value.value) = (yystack_[1].value.value); }
     break;
 
   case 21: // object_end: ']'
         { YYERROR; }
     break;
 
-  case 22: // members: member
-    { (yylhs.value.value) = (yystack_[0].value.value); }
+  case 22: // members: %empty
+           { (yylhs.value.value) = new JsonValue(JSON_OBJECT); std::cout << " empty object \n"; }
     break;
 
-  case 23: // members: member ',' members
-    { (yylhs.value.value) = (yystack_[2].value.value); }
-    break;
-
-  case 24: // member: key ':' value
-                  {
-        std::cout << "key:" << (yystack_[2].value.value)->js_str << " value:" << (yystack_[0].value.value)->js_str << std::endl;
+  case 23: // members: member
+           {
+        (yylhs.value.value) = new JsonValue(*((yystack_[0].value.value)), JSON_OBJECT); std::cout << " just one member object \n";
+        for (auto s: (yystack_[0].value.value)->js_object) {
+           std::cout << s.first << ":" << s.second.js_str << "\n";
+        }
     }
     break;
 
-  case 25: // key: JSON_T_STRING
+  case 24: // members: members ',' member
+                       {
+       std::cout << " more element value: " << (yystack_[0].value.value)->js_str << "\n";
+       (yystack_[2].value.value)->js_object.insert((yystack_[0].value.value)->js_object.begin(), (yystack_[0].value.value)->js_object.end());
+    }
+    break;
+
+  case 25: // member: key ':' value
+                  {
+        (yylhs.value.value)->js_object[(yystack_[2].value.value)->js_str] = *((yystack_[0].value.value));
+        std::cout << "object key:" << (yystack_[2].value.value)->js_str << " value:" << (yystack_[0].value.value)->js_str << std::endl;
+    }
+    break;
+
+  case 26: // key: JSON_T_STRING
                   { (yylhs.value.value) = new JsonValue(*(yystack_[0].value.value));  std::cout << "key:" << (yylhs.value.value)->js_str <<  std::endl;}
     break;
 
-  case 26: // key: JSON_T_ESTRING
+  case 27: // key: JSON_T_ESTRING
         { (yylhs.value.value) = (yystack_[0].value.value); }
     break;
 
@@ -870,31 +883,31 @@ namespace Json {
   JsonParser::yypact_[] =
   {
       -1,   -15,   -15,   -15,   -15,   -15,   -15,   -15,   -15,     1,
-      12,    -9,   -15,   -15,    -1,   -15,   -15,     8,    -2,     6,
-     -15,   -15,   -15,     5,   -15,   -15,   -15,     1,    -1,   -15,
+      12,    -9,   -15,   -15,    -1,   -15,   -15,     5,   -15,    -4,
+     -15,   -15,   -15,     8,   -15,   -15,     1,   -15,    -1,   -15,
      -15,    -1,   -15,   -15,   -15,   -15
   };
 
   const signed char
   JsonParser::yydefact_[] =
   {
-       0,     9,    10,    11,     7,     8,     5,     6,    12,     0,
-       0,     0,     4,     3,    16,    25,    26,     0,    22,     0,
-       1,     2,    17,     0,    21,    20,    19,     0,     0,    14,
-      15,     0,    13,    23,    24,    18
+       0,     9,    10,    11,     7,     8,     5,     6,    12,    22,
+       0,     0,     4,     3,    16,    26,    27,     0,    23,     0,
+       1,     2,    17,     0,    21,    20,     0,    19,     0,    14,
+      15,     0,    13,    24,    25,    18
   };
 
   const signed char
   JsonParser::yypgoto_[] =
   {
-     -15,   -15,   -14,   -15,   -15,   -15,   -15,   -15,   -15,   -11,
-     -15,   -15
+     -15,   -15,   -14,   -15,   -15,   -15,   -15,   -15,   -15,   -15,
+     -10,   -15
   };
 
   const signed char
   JsonParser::yydefgoto_[] =
   {
-       0,    10,    11,    12,    14,    32,    23,    13,    26,    17,
+       0,    10,    11,    12,    14,    32,    23,    13,    27,    17,
       18,    19
   };
 
@@ -902,16 +915,16 @@ namespace Json {
   JsonParser::yytable_[] =
   {
       22,    21,     1,     2,     3,     4,     5,     6,     7,    15,
-      16,     8,    20,    27,    34,     9,    33,    35,    29,    30,
-      31,    24,    25,    28
+      16,     8,    20,    28,    34,     9,    33,    35,    24,    25,
+      26,    29,    30,    31
   };
 
   const signed char
   JsonParser::yycheck_[] =
   {
       14,    10,     3,     4,     5,     6,     7,     8,     9,     8,
-       9,    12,     0,    15,    28,    16,    27,    31,    13,    14,
-      15,    13,    14,    17
+       9,    12,     0,    17,    28,    16,    26,    31,    13,    14,
+      15,    13,    14,    15
   };
 
   const signed char
@@ -919,8 +932,8 @@ namespace Json {
   {
        0,     3,     4,     5,     6,     7,     8,     9,    12,    16,
       19,    20,    21,    25,    22,     8,     9,    27,    28,    29,
-       0,    10,    20,    24,    13,    14,    26,    15,    17,    13,
-      14,    15,    23,    27,    20,    20
+       0,    10,    20,    24,    13,    14,    15,    26,    17,    13,
+      14,    15,    23,    28,    20,    20
   };
 
   const signed char
@@ -928,7 +941,7 @@ namespace Json {
   {
        0,    18,    19,    20,    20,    20,    20,    20,    20,    20,
       20,    20,    22,    21,    23,    23,    24,    24,    24,    25,
-      26,    26,    27,    27,    28,    29,    29
+      26,    26,    27,    27,    27,    28,    29,    29
   };
 
   const signed char
@@ -936,7 +949,7 @@ namespace Json {
   {
        0,     2,     2,     1,     1,     1,     1,     1,     1,     1,
        1,     1,     0,     4,     1,     1,     0,     1,     3,     3,
-       1,     1,     1,     3,     3,     1,     1
+       1,     1,     0,     1,     3,     3,     1,     1
   };
 
 
@@ -960,9 +973,9 @@ namespace Json {
   const signed char
   JsonParser::yyrline_[] =
   {
-       0,    42,    42,    46,    47,    48,    49,    50,    51,    52,
-      53,    54,    58,    58,    68,    70,    74,    76,    81,    85,
-      90,    92,    96,    97,   101,   107,   108
+       0,    43,    43,    47,    48,    49,    50,    51,    52,    53,
+      54,    55,    59,    59,    69,    71,    75,    77,    82,    86,
+      91,    93,    97,    98,   104,   111,   118,   119
   };
 
   void

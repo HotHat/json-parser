@@ -1,1 +1,1 @@
-["a1", "a2", "a3", ["b1", "b2"]]
+[1, 2, null, false, true, {"k":  [1, 2.5, null, false, true]}]

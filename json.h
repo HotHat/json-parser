@@ -11,6 +11,9 @@
 #include <memory>
 
 enum JsonTypeEnum {
+    JSON_NULL,
+    JSON_TRUE,
+    JSON_FALSE,
     JSON_INT,
     JSON_DOUBLE,
     JSON_STRING,
@@ -24,8 +27,7 @@ struct JsonValue {
     int js_int;
     std::string js_str;
     std::vector<JsonValue> js_array;
-
-    // std::map<std::string, JsonValue> js_object;
+    std::map<std::string, JsonValue> js_object;
 
     // JsonValue &operator=(const JsonValue &right) {
     //     type = right.type;
@@ -45,6 +47,7 @@ struct JsonValue {
         js_double = old.js_double;
         js_str = old.js_str;
         js_array = old.js_array;
+        js_object = old.js_object;
     }
 
     JsonValue(const JsonValue& old, JsonTypeEnum p_type): JsonValue(old) {
@@ -59,17 +62,42 @@ struct JsonValue {
 
 private:
     void print_js(const JsonValue &js, int indent=0) {
+        std::string indent_space;
         if (indent > 0) {
             std::cout << std::string(indent * 4, ' ');
         }
-        if (js.type == JSON_ARRAY) {
-            std::cout << "array: [" << std::endl;
+
+        // indent space
+        std::cout << indent_space;
+
+        if (js.type == JSON_NULL) {
+            std::cout << "null" << "\n";
+        } else if (js.type == JSON_TRUE) {
+            std::cout << "true" << "\n";
+        } else if (js.type == JSON_FALSE) {
+            std::cout << "false" << "\n";
+        } else if (js.type == JSON_INT) {
+            std::cout << js.js_str;
+        } else if (js.type == JSON_DOUBLE) {
+            std::cout << js.js_str;
+        } else if (js.type == JSON_ARRAY) {
+            std::cout << "array: [" << "\n";
             for (auto s: js.js_array) {
                 print_js(s, indent + 1);
+                std::cout << ", ";
             }
-            std::cout << ((indent>0) ? std::string(indent * 4, ' ') : "")  << "]" << std::endl;
+            // indent space
+            std::cout << indent_space  << "]" ;
         } else if (js.type == JSON_STRING) {
-            std::cout << '"' << js.js_str << '"' << std::endl;
+            std::cout << '"' << js.js_str << '"' ;
+        } else {
+            std::cout << "object: {" << "\n";
+            for (auto s: js.js_object) {
+                std::cout << indent_space << '"' << s.first << '"' << ":";
+                print_js(s.second, indent);
+                std::cout << "\n";
+            }
+            std::cout << indent_space  << "}" << "\n";
         }
     }
 };
