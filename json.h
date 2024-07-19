@@ -61,43 +61,67 @@ struct JsonValue {
     }
 
 private:
-    void print_js(const JsonValue &js, int indent=0) {
+    void print_js(const JsonValue &js, int indent=0, bool skip=false) {
         std::string indent_space;
         if (indent > 0) {
-            std::cout << std::string(indent * 4, ' ');
+            indent_space = std::string(indent * 4, ' ');
         }
 
         // indent space
-        std::cout << indent_space;
+        // std::cout << indent_space;
 
-        if (js.type == JSON_NULL) {
-            std::cout << "null" << "\n";
-        } else if (js.type == JSON_TRUE) {
-            std::cout << "true" << "\n";
-        } else if (js.type == JSON_FALSE) {
-            std::cout << "false" << "\n";
-        } else if (js.type == JSON_INT) {
-            std::cout << js.js_str;
-        } else if (js.type == JSON_DOUBLE) {
-            std::cout << js.js_str;
-        } else if (js.type == JSON_ARRAY) {
-            std::cout << "array: [" << "\n";
-            for (auto s: js.js_array) {
-                print_js(s, indent + 1);
-                std::cout << ", ";
+        if (js.type == JSON_ARRAY) {
+            auto data = js.js_array;
+            if (skip) {
+                std::cout << "[" << "\n";
+            } else {
+                std::cout << indent_space << "[" << "\n";
+            }
+            for(auto it = data.begin(); it != data.end(); ++it) {
+            // for (auto s: js.js_array) {
+                print_js(*it, indent + 1);
+                if (it != std::prev(data.end())) {
+                    std::cout << ",";
+                }
+                std::cout << "\n";
             }
             // indent space
-            std::cout << indent_space  << "]" ;
-        } else if (js.type == JSON_STRING) {
-            std::cout << '"' << js.js_str << '"' ;
-        } else {
-            std::cout << "object: {" << "\n";
-            for (auto s: js.js_object) {
-                std::cout << indent_space << '"' << s.first << '"' << ":";
-                print_js(s.second, indent);
+            std::cout << indent_space  << "]\n" ;
+        }  else if (js.type == JSON_OBJECT){
+            auto data = js.js_object;
+            if (skip) {
+                std::cout << "{" << "\n";
+            } else {
+                std::cout << indent_space << "{" << "\n";
+            }
+            auto item_indent_space = std::string((indent+1) * 4, ' ');
+            for(auto it = data.begin(); it != data.end(); ++it) {
+            // for (auto s: js.js_object) {
+                std::cout << item_indent_space << '"' << it->first << '"' << ":";
+                print_js(it->second, indent+1, true);
+
+                if (it != std::prev(data.end())) {
+                    std::cout << ",\n";
+                }
                 std::cout << "\n";
             }
             std::cout << indent_space  << "}" << "\n";
+        } else {
+            // indent space
+            std::cout << indent_space;
+            if (js.type == JSON_NULL) {
+                std::cout << "null";
+            } else if (js.type == JSON_TRUE) {
+                std::cout << "true";
+            } else if (js.type == JSON_FALSE) {
+                std::cout << "false";
+            } else if (js.type == JSON_INT) {
+                std::cout << js.js_str;
+            } else if (js.type == JSON_DOUBLE) {
+                std::cout << js.js_str;
+            } else if (js.type == JSON_STRING) {
+                std::cout << '"' << js.js_str << '"' ;
+            }
         }
     }
 };
